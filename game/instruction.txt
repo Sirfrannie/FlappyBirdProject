@@ -1,0 +1,47 @@
+I've made project repository on github
+
+please follow this instruction ::
+
+install git to your system -> https://git-scm.com/downloads
+check if git bash available in your system (for windows it may require to reboot system)
+
+head to https://github.com/Sirfrannie/FlappyBirdProject on your browser
+click "Fork" -> create Fork
+
+// set up
+open git bash and change directory(folder) to your workspace
+$ cd <your_work_space_path>
+[ex]$ cd c:\desktop\work
+
+clone project repo
+$ git clone https://github.com/Sirfrannie/FlappyBirdProject
+after that the FlappyBirdProject floder should be on your project directory
+
+move into project directory >> $ cd FlappyBirdProject
+
+then type the following command
+$ git checkout -b <your_branch_name> // you can name whatever you want
+[ex]$ git checkout -b fran
+
+$ git remote add upstream https://github.com/Sirfrannie/FlappyBirdProject
+
+----------------------------------------------------------------------------------------------
+// work flow
+(to be safe make sure that your current directory is <your_path>\FlappyBirdProject\ not \FlappyBirdProject\game\ or any sub directory
+example ~/proj/main/FlappyBirdProject/ NOT ~/proj/main/FlappyBirdProject/game OR ~/proj/main/
+
+sync your local machine to repo (update your code on your machine to be same as repository)
+$ git pull origin main
+
+after you make some change and want to update to git repo 
+$ git add <file> // name of file Or you can just use . to add all file (git add .)
+
+you can check status by $ git status
+commit change
+$ git commit -m "<message>" // any message for commit
+
+push your code to github
+$ git push --set-upstream origin main
+----------------------------------------------------------------------------------------------
+
+// make pull request 
