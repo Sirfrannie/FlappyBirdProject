@@ -9,7 +9,7 @@ public class Flappybird {
 
         jframe.add(panel);
         jframe.setTitle("FlappyBird");
-        jframe.setSize(500, 500);
+        jframe.setSize(1280, 720);
         jframe.setVisible(true);
         jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
