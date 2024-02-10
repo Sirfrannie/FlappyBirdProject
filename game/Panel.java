@@ -9,42 +9,41 @@ import java.awt.image.BufferedImage;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
+import java.lang.Thread;
 
 public class Panel extends JPanel implements KeyListener, ActionListener{
-    BufferedImage imagebg;
+    Background bg[];
+    Pipe p[] = new Pipe[8];
     Bird b[] = new Bird[2];
     int numPlayer = 2;
 
-    public final int width = 1280, height = 720;
-    int bgwidth=0;
-    // pipe
-    final int pipevelocity = 5;
-    final int pipewidth = 50;
-    int[] pipe = { width, width + width / 2 };
-    int[] gappipe = { (int) (Math.random() * (height - 150)), (int) (Math.random() * (height - 100)) };
+
+    public final int WIDTH = 1280, HEIGHT = 720;
+
+    int score = 0;
+    //  components detail
+    int pipeWidth;
+    int bgWidth;
+    int birdWidth;
     // bird
-    int flappyheight = height / 4;
+    int flappyheight = HEIGHT / 4;
     int flappyV[] = {0, 0};
     int flappyA[] = {7, 7};
     int flappyI[] = {1, 1};
-    // double flappyV = 0;
-    // double flappyA = 7;
-    // double flappyI = 0.001;
-    // gameset
     boolean gameOver = false;
+    //
+    boolean firstStage = true;
+    boolean firstStageBg = true;
 
     public Panel() {
         setFocusable(true);
         addKeyListener(this);
+        setDoubleBuffered(true);
 
         for (int i=0; i<numPlayer; ++i){
             b[i] = new Bird();
         }
-        try {
-            imagebg = ImageIO.read(new File("img/hd-a5u9zq0a0ymy2dug.jpg"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        bg = new Background[6];
         new Timer(40, this).start();
     }
 
@@ -56,69 +55,123 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
             birdpic(g);
             drawpipe(g);
             logic();
-        } else {
-            
-        }
-
+        }            
     }
 
     public void birdpic(Graphics g) {
         // g.drawImage(imagefb, 100, flappyheight + flappyV, null);
-        g.drawImage(b[0].getImage(), 100, flappyheight + flappyV[0], null);
-        g.drawImage(b[1].getImage(), 100, flappyheight + flappyV[1], null);
+        for (int i=0; i<b.length; ++i){
+            g.drawImage(b[i].getImage(), 100, flappyheight + flappyV[i], null);
+        }
     }
     public void bgpic(Graphics g){
-        g.drawImage(imagebg, bgwidth  , 0,null);
+        // g.drawImage(imagebg, bgwidth  , 0,null);
+        if (firstStageBg){
+            for (int i=0; i<bg.length; ++i){
+                if (bg[i] == null){
+                    bg[i] = new Background();
+                    bg[i].x += bg[i].getWidth()*i;
+                }
+                g.drawImage(bg[i].getImage(), bg[i].x, 0, null);
+            }    
+            bgWidth = bg[0].getWidth();
+            firstStageBg = false;
+        }else{
+            for (int i=0; i<bg.length; ++i){
+                if (bg[i] == null){
+                    bg[i] = new Background();
+                    if ( i == 0){
+                        bg[i].x = bg[bg.length-1].x+bgWidth;
+                    }else{
+                        bg[i].x = bg[i-1].x+bgWidth;
+                    }
+                }
+                g.drawImage(bg[i].getImage(), bg[i].x, 0, null);
+            }    
+
+        }
     }
 
     private void drawpipe(Graphics g) {
-        // for (int i = 0; i < 2; i++) {
-            // g.setColor(Color.green);
-            // g.fillRect(pipe[i], 0, pipewidth, height);
-// 
-            // g.setColor(Color.black);
-            // g.fillRect(pipe[i], gappipe[i], pipewidth, 100);
-        // }
-        g.drawImage(new Pipe().getImage(), bgwidth, 0, null);
-    }
-
-    private void logic() {
-        for (int i = 0; i < 2; i++) {
-            if (pipe[i] <= 100 && pipe[i] + pipewidth >= 100) { 
-                if ((flappyheight + flappyV[0]) >= 0 && (flappyheight + flappyV[0]) <= gappipe[i]
-                        || (flappyheight + flappyV[0] + 25) >= gappipe[i] + 100
-                                && (flappyheight + flappyV[0] + 25) <= height) {
-                    gameOver = false;
+        if (firstStage){
+            for (int i=0; i<p.length; ++i){
+                if (p[i] == null){
+                    p[i] = new Pipe();
+                    p[i].x += ((p[i].getWidth()*2)+200)*i;
                 }
+                g.drawImage(p[i].getTop(), p[i].x, p[i].yTop, null);
+                g.drawImage(p[i].getBot(), p[i].x, p[i].yBot, null);
             }
-            if (pipe[i] + pipewidth <= 0) {
-                pipe[i] = width;
-                gappipe[i] = (int) (Math.random() * (height - 150));
-            }
-        }
+            pipeWidth = p[0].getWidth();
+            firstStage = false;
+        }else{
+            for (int i=0; i<p.length; ++i){
+                if (p[i] == null){
+                    p[i] = new Pipe();
+                    if ( i == 0 ){
+                        p[i].x = (p[p.length-1].x+pipeWidth)+((p[i].getWidth()*2));
+                    }else{
+                        p[i].x = (p[i-1].x+pipeWidth)+((p[i].getWidth()*2));
+                    }
+                }
+                g.drawImage(p[i].getTop(), p[i].x, p[i].yTop, null);
+                g.drawImage(p[i].getBot(), p[i].x, p[i].yBot, null);
+            }    
 
+        }
+    }
+    private void logic() {
+        // for (int i = 0; i < 2; i++) {
+            // if (pipe[i] <= 100 && pipe[i] + pipewidth >= 100) { 
+                // if ((flappyheight + flappyV[0]) >= 0 && (flappyheight + flappyV[0]) <= gappipe[i]
+                        // || (flappyheight + flappyV[0] + 25) >= gappipe[i] + 100
+                                // && (flappyheight + flappyV[0] + 25) <= height) {
+                    // gameOver = false;
+                // }
+            // }
+            // if (pipe[i] + pipewidth <= 0) {
+                // pipe[i] = width;
+                // gappipe[i] = (int) (Math.random() * (height - 150));
+            // }
+        // }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // System.out.println("Action Performing"+ ++i);
         // bird-action
-        flappyA[0] += flappyI[0];
-        flappyV[0] += flappyA[0];
-        flappyA[1] += flappyI[1];
-        flappyV[1] += flappyA[1];
-        if (flappyV[0] > height-flappyheight-100){
-            flappyV[0] = height-flappyheight-100;
+        for (int i=0; i<b.length; ++i){
+            flappyA[i] += flappyI[i];
+            flappyV[i] += flappyA[i];
+            if (flappyV[i] > HEIGHT-flappyheight-100){
+                flappyV[i] = HEIGHT-flappyheight-100;
+            }
         }
-        // if (flappyV[1] > height-flappyheight-100){
-            // flappyV[1] = height-flappyheight-100;
-        // }
-        bgwidth --;
-        // pipe/action
-        // pipe[0] -= pipevelocity;
-        // pipe[1] -= pipevelocity;
-
+        // Pipe-action
+        for (int i=0; i<p.length; ++i){
+            if (p[i] != null){
+                p[i].x-=5;
+            }
+            if (p[i].x < -1*p[i].getWidth()){
+                p[i] = null;
+            }
+        }
+        // background-action
+        for (int i=0; i<bg.length; ++i){
+            if (bg[i] != null){
+                bg[i].x-=4;
+            }
+            if (bg[i].x < -1*bg[i].getWidth()-50){
+                bg[i] = null;
+            }
+        }
+        for (int i=0; i<p.length; ++i){
+            if (p[i] != null && p[i].x-flappyheight < 1){
+                score ++;
+                System.out.println(score);
+            }
+        }
         repaint();
+        Toolkit.getDefaultToolkit().sync(); //syschronizes the graphic state make it run smoothly
     }
 
     @Override
