@@ -5,12 +5,13 @@ import java.io.File;
 import java.lang.Math;
 class Pipe extends Components 
 {
-    int x = 1280;
-    int yTop; // topside pipe position
-    int yBot; // bottomside pipe position
-    BufferedImage pipeImg[] = new BufferedImage[2];
-    int width, height;
-    static int num;
+    public int x = 1280; // initial Pipe Position (at the end of window)
+    public int yTop; // topside pipe position
+    public int yBot; // bottomside pipe position
+    public int gap;
+    public BufferedImage pipeImg[] = new BufferedImage[2];
+    public int width, height;
+    public boolean used = false;
     
     public Pipe(){
         for (int i=0; i<pipeImg.length; ++i){
@@ -24,10 +25,12 @@ class Pipe extends Components
                 e.printStackTrace();
             }
         }
+        gap = pipeGap();
         width = pipeImg[0].getWidth();
         height = pipeImg[0].getHeight();
         yTop = randYTop();
-        yBot = yTop+height+pipeGap();
+        yBot = yTop+height+gap;
+        System.out.println(gap);
 
     }
     public int pipeGap(){
