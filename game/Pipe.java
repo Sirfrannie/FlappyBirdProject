@@ -5,7 +5,7 @@ import java.io.File;
 import java.lang.Math;
 class Pipe extends Components 
 {
-    public int x = 1280; // initial Pipe Position (at the end of window)
+    public int x = 1000; // initial Pipe Position (at the end of window)
     public int yTop; // topside pipe position
     public int yBot; // bottomside pipe position
     public int gap;
@@ -30,7 +30,7 @@ class Pipe extends Components
         height = pipeImg[0].getHeight();
         yTop = randYTop();
         yBot = yTop+height+gap;
-        System.out.println(gap);
+        // System.out.println(gap);
 
     }
     public int pipeGap(){

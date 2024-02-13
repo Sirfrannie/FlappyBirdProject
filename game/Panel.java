@@ -14,6 +14,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
     private Pipe p[] = new Pipe[8];
     private Bird b[] = new Bird[1];
     private Hitbox h = null;
+    private Scoreboard sb = new Scoreboard();
 
     public final int WIDTH = 1280, HEIGHT = 720;
 
@@ -59,7 +60,8 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
             if (isPlaying){ // while player is playing
                 drawpipe(g);
                 buildHitbox();
-                logic();
+                sb.update(g);
+                logic(g);
             }
         }else{
         }
@@ -101,10 +103,10 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
             // moving
             if (bg[i] != null){
                 bg[i].x-=4;
-            }
-            // get rid of it
-            if (bg[i].x < -1*bg[i].getWidth()-50){
-                bg[i] = null;
+                // get rid of it
+                if (bg[i].x < -1*bg[i].getWidth()-50){
+                    bg[i] = null;
+                }
             }
         }
         // update hit box position make hitbox follow the pipe
@@ -203,7 +205,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
         }
     }
     private int position; // current bird Y position
-    private void logic() {
+    private void logic(Graphics g) {
         if ( h != null ){
             for (int i=0; i<b.length; ++i){
                 position = flappyheight+flappyV[i];
@@ -224,6 +226,7 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
                 }
                 if ( b[i].x >= h.scoreLine ){
                     System.out.println("Scored");
+                    sb.plus(1);
                     h = null; // remove hitbox form that pipe
                 }
             }

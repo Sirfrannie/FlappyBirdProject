@@ -4,7 +4,7 @@ import javax.imageio.ImageIO; // reading Image
 import java.io.File; 
 class Bird extends Components
 {
-    public int x=100;
+    public int x=100; // initial bird position
     public Bird(){
         try {
             img = ImageIO.read(new File("img/bluebird-midflap.png"));
