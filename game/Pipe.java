@@ -13,6 +13,15 @@ class Pipe extends Components
     public int width, height;
     public boolean used = false;
     
+    public Pipe(Pipe p){
+        this.x = p.x;
+        this.yTop = p.yTop;
+        this.yBot = p.yBot;
+        this.gap = p.gap;
+        System.arraycopy(p.pipeImg, 0, this.pipeImg, 0, p.pipeImg.length);
+        this.width = p.width;
+        this.height = p.height;
+    }
     public Pipe(){
         for (int i=0; i<pipeImg.length; ++i){
             try {

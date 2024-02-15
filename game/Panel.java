@@ -11,25 +11,16 @@ import java.io.IOException;
 
 public class Panel extends JPanel implements KeyListener, ActionListener{
     private Background bg[];
-    private Pipe p[] = new Pipe[8];
-    private Bird b[] = new Bird[1];
-    private Hitbox h = null;
-    private Scoreboard sb = new Scoreboard();
+    private Player player[];
+    private Player self;
+    private Player pipeBuilder;
 
     public final int WIDTH = 1280, HEIGHT = 720;
 
-    private int score = 0;
     //  components detail
-    private int pipeWidth;
-    private int pipeHeight;
     private int bgWidth;
-    private int birdWidth;
-    private int birdHeight;
     // bird
     private int flappyheight;
-    private int flappyV[] = {0, 0};
-    private int flappyA[] = {7, 7};
-    private int flappyI[] = {1, 1};
     private boolean gameOver = false;
    //
     private boolean isPlaying = false;
@@ -43,12 +34,16 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
         setDoubleBuffered(true);
         bg = new Background[6];
 
-        for (int i=0; i<b.length; ++i){
-            b[i] = new Bird();
+        player = new Player[1];
+        for (int i=0; i<player.length; ++i){
+            player[i] = new Player(i);
         }
-        birdHeight = b[0].getHeight();
-        birdWidth = b[0].getWidth(); 
-        flappyheight = (HEIGHT/2)+(b[0].getHeight()/2);
+
+        self = player[player[0].id];
+        pipeBuilder = player[0]; 
+        pipeBuilder.buildPipe(player);
+
+        flappyheight = (HEIGHT/2)+(self.bird.getHeight()/2);
         t = new Timer(40, this);
         t.start();
     }
@@ -59,8 +54,8 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
             drawbird(g);
             if (isPlaying){ // while player is playing
                 drawpipe(g);
-                buildHitbox();
-                sb.update(g);
+                self.buildHitbox();
+                self.score.update(g);
                 logic(g);
             }
         }else{
@@ -69,30 +64,28 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if (isPlaying){
-            // bird-action
-            for (int i=0; i<b.length; ++i){ // for all bird
-                // (de)increase bird position (to make bird fell down)
-                flappyA[i] += flappyI[i];
-                flappyV[i] += flappyA[i];
-                // lowest position possible
-                if (flappyV[i] > (HEIGHT-flappyheight)-100){
-                    flappyV[i] = (HEIGHT-flappyheight)-100;
-                }
-                // highest position possible 
-                if (flappyheight+flappyV[i] < 10){
-                    System.out.println(flappyV[i]);
-                    flappyV[i] = -1*flappyheight+10;
-                }
+            /// bird-action
+            /// (de)increase bird position (to make bird fell down)
+            self.flappyA += self.flappyI;
+            self.flappyV += self.flappyA;
+            /// lowest position possible
+            if (self.flappyV > (HEIGHT-flappyheight)-100){
+                self.flappyV = (HEIGHT-flappyheight)-100;
             }
-            // Pipe-action
-            for (int i=0; i<p.length; ++i){ // for all pipe
-                // for the pipe which exist
-                if (p[i] != null){
+            /// highest position possible 
+            if (flappyheight + self.flappyV < 10){
+                // System.out.println(p.flappyV);
+                self.flappyV = -1*flappyheight+10;
+            }
+            /// Pipe-action
+            for (int i=0; i<self.pipeList.length; ++i){ // for all pipe
+                /// for the pipe which exist
+                if (self.pipeList[i] != null){
                     // move to left
-                    p[i].x-=5;
-                    // get rid of pipe which out of frame
-                    if (p[i].x < -1*p[i].getWidth()){  
-                        p[i] = null; // set p[i] to null to make it reusable
+                    self.pipeList[i].x-=5;
+                    /// get rid of pipe which out of frame
+                    if (self.pipeList[i].x < -1*self.pipeList[i].getWidth()){  
+                        self.pipeList[i] = null; // set pipe to null to make it reusable
                     }
                 }
             }
@@ -100,28 +93,25 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
         } // {if playing}
         // background-action
         for (int i=0; i<bg.length; ++i){
-            // moving
+            /// moving
             if (bg[i] != null){
                 bg[i].x-=4;
-                // get rid of it
+                /// get rid of it
                 if (bg[i].x < -1*bg[i].getWidth()-50){
                     bg[i] = null;
                 }
             }
         }
-        // update hit box position make hitbox follow the pipe
-        if ( h != null){
-            h.update();
+        /// update hit box position make hitbox follow the pipe
+        if ( self.hitbox != null ){
+            self.hitbox.update();
         }
-        // repaint components (call paintComponent()) 
+        /// repaint components (call paintComponent()) 
         repaint();
         Toolkit.getDefaultToolkit().sync(); //synchronizes the graphic state make it run smoothly
     }
     private void drawbird(Graphics g) {
-        // for all bird in array
-        for (int i=0; i<b.length; ++i){
-            g.drawImage(b[i].getImage(), b[i].x, flappyheight + flappyV[i], null); // redraw bird
-        }
+        g.drawImage(self.bird.getImage(), self.bird.x, flappyheight + self.flappyV, null); // redraw bird
     }
     private void drawbg(Graphics g){
         // initalization ( all element in array of pipe are null )
@@ -157,78 +147,36 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
     }
 
     private void drawpipe(Graphics g) {
-        // initalization ( all element in array of pipe are null )
-        if (firstStage){
-            for (int i=0; i<p.length; ++i){
-                if (p[i] == null){
-                    p[i] = new Pipe();
-                    // create space between each pipe
-                    p[i].x += ((p[i].getWidth()*2)+200)*i;
-                }
-                g.drawImage(p[i].getTop(), p[i].x, p[i].yTop, null); // draw pipe
-                g.drawImage(p[i].getBot(), p[i].x, p[i].yBot, null); // draw pipe
-            }
-            pipeWidth = p[0].getWidth();
-            firstStage = false; // end the initialize stage 
-        }else{
-            for (int i=0; i<p.length; ++i){
-                // creat non-exist pipe 
-                if (p[i] == null){ 
-                    p[i] = new Pipe();
-                    // check if non-exist pipe is the first pipe in array
-                    if ( i == 0 ){ 
-                        // create with position next to last one
-                        p[i].x = (p[p.length-1].x+pipeWidth)+((p[i].getWidth()*2)); 
-                    }else{
-                        // create with position next to before
-                        p[i].x = (p[i-1].x+pipeWidth)+((p[i].getWidth()*2)); 
-                    }
-                }
-                g.drawImage(p[i].getTop(), p[i].x, p[i].yTop, null); // redraw topside
-                g.drawImage(p[i].getBot(), p[i].x, p[i].yBot, null); // redraw botside
-            }    
-
-        }
-    }
-    int pipenumber=0; // to tell which pipe the hit box should be with
-    private void buildHitbox(){
-        for (int i=0; i<p.length; ++i){
-            if ( p[i] != null){
-                if ( h == null && i == pipenumber){
-                    h = new Hitbox(p[i]);
-                    pipenumber ++;
-                    if (pipenumber == p.length){ // if reached to the last pipe
-                        pipenumber = 0;
-                    }
-                }
-            }
+        self.takeTmp();
+        pipeBuilder.buildPipe(player);
+        for (int i=0; i<self.pipeList.length; ++i){
+            g.drawImage(self.pipeList[i].getTop(), self.pipeList[i].x, self.pipeList[i].yTop, null); 
+            g.drawImage(self.pipeList[i].getBot(), self.pipeList[i].x, self.pipeList[i].yBot, null); 
         }
     }
     private int position; // current bird Y position
     private void logic(Graphics g) {
-        if ( h != null ){
-            for (int i=0; i<b.length; ++i){
-                position = flappyheight+flappyV[i];
-                if (
-                        /// check if top left side hits the pipe
-                        h.front <= b[i].x && b[i].x-10 <= h.behind && position < h.topLevel 
-                        /// check if top right side hits the pipe
-                        || h.front <= b[i].x+birdWidth-10 && b[i].x <= h.behind && position < h.topLevel 
-                        /// check if bottom left side hits the pipe
-                        || h.front <= b[i].x-10 && b[i].x <= h.behind && position+birdHeight > h.botLevel
-                        /// check if bottom right side hits the pipe
-                        || h.front <= b[i].x+birdWidth-10 && b[i].x <= h.behind && position+birdHeight > h.botLevel
-                        ){
+        if ( self.hitbox != null ){
+            position = self.getBirdPosition(flappyheight);
+            if (
+                    /// check if top left side hits the pipe
+                    self.hitbox.front <= self.bird.x && self.bird.x-10 <= self.hitbox.behind && position < self.hitbox.topLevel 
+                    /// check if top right side hits the pipe
+                    || self.hitbox.front <= self.bird.x+self.bird.getWidth()-10 && self.bird.x <= self.hitbox.behind && position < self.hitbox.topLevel 
+                    /// check if bottom left side hits the pipe
+                    || self.hitbox.front <= self.bird.x-10 && self.bird.x <= self.hitbox.behind && position+self.bird.getHeight() > self.hitbox.botLevel
+                    /// check if bottom right side hits the pipe
+                    || self.hitbox.front <= self.bird.x+self.bird.getWidth()-10 && self.bird.x <= self.hitbox.behind && position+self.bird.getHeight()> self.hitbox.botLevel
+                    ){
 
-                    System.out.println("Hit");
-                    h = null; // remove hitbox from that pipe 
-                    return;
-                }
-                if ( b[i].x >= h.scoreLine ){
-                    System.out.println("Scored");
-                    sb.plus(1);
-                    h = null; // remove hitbox form that pipe
-                }
+                System.out.println("Hit");
+                self.hitbox = null; // remove hitbox from that pipe 
+                return;
+            }
+            if ( self.bird.x >= self.hitbox.scoreLine ){
+                System.out.println("Scored");
+                self.score.plus(123456);
+                self.hitbox = null; // remove hitbox form that pipe
             }
         }
     }
@@ -243,10 +191,9 @@ public class Panel extends JPanel implements KeyListener, ActionListener{
             if (!isPlaying){
                 isPlaying = true;
             }
-            flappyA[0] = -7;
+            self.flappyA = -7;
         }
         if (code == KeyEvent.VK_W) {
-            flappyA[1] = -7;
         }
         if (code == KeyEvent.VK_ESCAPE){
             isPlaying = !isPlaying;
