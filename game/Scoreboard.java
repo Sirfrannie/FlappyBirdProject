@@ -32,6 +32,7 @@ public class Scoreboard extends Components
     int cur;
     public void update(Graphics g){
         int s = score;
+        if ( s > 9999999 ) s = 9999999;
         for (int i=6; i>=1; --i){
             cur = (int)(Math.pow(10, i));
             g.drawImage(number[0+(int)(s/cur)], positionX-((numWidth-1)*i), positionY, null);
