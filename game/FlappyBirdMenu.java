@@ -31,13 +31,11 @@ public class FlappyBirdMenu extends JFrame {
         JPanel gameModesPanel = createGameModesPanel();
         JPanel singlePlayerPanel = createSinglePlayerPanel(); // Singleplayer Panel
         JPanel dualPlayerPanel = createDualPlayerPanel(); // Dual Panel
-        JPanel multiplayerPanel = createMultiplayerPanel(); // Multiplayer panel
 
         cards.add(mainMenuPanel, "MainMenu");
         cards.add(gameModesPanel, "GameModes");
         cards.add(singlePlayerPanel, "SinglePlayer");
         cards.add(dualPlayerPanel, "DualPlayer");
-        cards.add(multiplayerPanel, "Multiplayer");
 
         initializeSounds();
         setVisible(true);
@@ -81,7 +79,7 @@ public class FlappyBirdMenu extends JFrame {
             }
         };
 
-        String[] modeButtons = {"SINGLEPLAYER", "DUAL", "MULTIPLAYER", "BACK"};
+        String[] modeButtons = {"SINGLEPLAYER", "DUAL", "BACK"};
         int yPos = 200;
 
         for (String label : modeButtons) {
@@ -93,10 +91,6 @@ public class FlappyBirdMenu extends JFrame {
                 button.addActionListener(e -> cardLayout.show(cards, "SinglePlayer"));
             } else if ("DUAL".equals(label)) {
                 button.addActionListener(e -> cardLayout.show(cards, "DualPlayer"));
-            } else if ("MULTIPLAYER".equals(label)) {
-                button.addActionListener(e -> cardLayout.show(cards, "Multiplayer"));
-            } else if ("BACK".equals(label)) {
-                button.addActionListener(e -> cardLayout.show(cards, "MainMenu"));
             }
 
             gameModesPanel.add(button);
@@ -213,52 +207,6 @@ public class FlappyBirdMenu extends JFrame {
         dualPlayerPanel.add(startButton);
 
         return dualPlayerPanel;
-    }
-
-    private JPanel createMultiplayerPanel() {
-        JPanel multiplayerPanel = new JPanel(null) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.drawImage(backgroundScaled, 0, 0, this.getWidth(), this.getHeight(), this);
-            }
-        };
-
-        int startX = (1280 - (4 * 200 + 3 * 10)) / 2;
-        int yPos = (720 - 200) / 2;
-
-        // "1P", "2P", "3P", "4P" buttons
-        String[] playerOptions = {"1P", "2P", "3P", "4P"};
-        for (int i = 0; i < playerOptions.length; i++) {
-            JButton playerButton = createMenuButtonWithIcon(playerOptions[i], "img/bluebird-midflap.png");
-            playerButton.setBounds(startX + i * (200 + 10), yPos, 200, 100);
-            multiplayerPanel.add(playerButton);
-        }
-
-        JButton backButton = createMenuButton("BACK");
-        backButton.setBounds(60, 720 - 120, 200, 50);
-        backButton.addActionListener(e -> cardLayout.show(cards, "GameModes"));
-        multiplayerPanel.add(backButton);
-
-        // "START" button
-        JButton startButton = new JButton("START");
-        startButton.setFont(customFont);
-        startButton.setFocusPainted(false);
-        startButton.setContentAreaFilled(false);
-        startButton.setOpaque(true);
-        startButton.setBorderPainted(true);
-        startButton.setBackground(Color.ORANGE);
-        startButton.setForeground(Color.BLACK);
-        startButton.setBounds(1280 - 260, 720 - 120, 200, 50);
-        startButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent evt) {
-                hoverSoundPlayer.play();
-            }
-        });
-        multiplayerPanel.add(startButton);
-
-        return multiplayerPanel;
     }
 
     private JButton createMenuButtonWithIcon(String text, String iconFilePath) {
