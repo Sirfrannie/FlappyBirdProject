@@ -91,8 +91,10 @@ public class FlappyBirdMenu extends JFrame {
                 button.addActionListener(e -> cardLayout.show(cards, "SinglePlayer"));
             } else if ("DUAL".equals(label)) {
                 button.addActionListener(e -> cardLayout.show(cards, "DualPlayer"));
+            } else if ("BACK".equals(label)) {
+                button.addActionListener(e -> cardLayout.show(cards, "MainMenu"));
             }
-
+             
             gameModesPanel.add(button);
         }
 

@@ -11,11 +11,10 @@ public class Player
     public int flappyV = 0;
     public int flappyA = 7;
     public int flappyI = 1;
-    public int jump;
     
     public Player(int id){
         this.id = id;
-        bird = new Bird(2); 
+        bird = new Bird(); 
         pipeList = new Pipe[10];
         score = new Scoreboard(); 
         temporaryPipe = new ArrayList<Pipe>();
@@ -27,7 +26,7 @@ public class Player
     }
     private int hitboxposition=0;
     public void buildHitbox(){
-        if (hitbox == null && pipeList[hitboxposition] != null){
+        if (hitbox == null){
             hitbox = new Hitbox(pipeList[hitboxposition++]);
             if (hitboxposition == pipeList.length){ // if reached to the last pipe
                 hitboxposition = 0;
@@ -44,16 +43,9 @@ public class Player
     }
     public void takeTmp(){
         if ( !temporaryPipe.isEmpty() ){
-            System.out.println("form player "+id+" "+temporaryPipe);
             for (int i=0; i<pipeList.length; ++i){
                 if ( pipeList[i] == null ){
                     pipeList[i] = temporaryPipe.remove(0); 
-                    System.out.println("form player "+id+" "+temporaryPipe);
-                    if ( i == 0 ){
-                        pipeList[i].x = (pipeList[pipeList.length-1].x+pipeList[i].getWidth())+((pipeList[i].getWidth()*2)); 
-                    }else{
-                        pipeList[i].x = (pipeList[i-1].x+pipeList[i].getWidth())+((pipeList[i].getWidth()*2)); 
-                    }
                     if (temporaryPipe.isEmpty()) return;
                 }
             }
@@ -61,18 +53,19 @@ public class Player
     }
     // for Pipebulider create pipe for itself and another
     // make all player have same pipe
+    private Pipe newPipe;
     public void buildPipe(Player a[]){
         if (firstStage){
             for (int i=0; i<pipeList.length; ++i){
                 if (pipeList[i] == null){
-                    pipeList[i] = new Pipe();
+                    newPipe = new Pipe();
+                    pipeList[i] = newPipe;
                     for (int j=0; j<a.length; ++j){
-                        if ( a[j] == this ){
-                        }else{
-                            a[j].pipeList[i] = new Pipe(pipeList[i]);
-                            a[j].pipeList[i].x += ((a[j].pipeList[i].getWidth()*2)+200)*i;
-                            a[j].firstStage = false;
+                        if ( a[j].id == this.id ){
+                            continue;
                         }
+                        a[j].pipeList[i] = newPipe;
+                        a[j].firstStage = false;
                     }
                     // create space between each pipe
                     pipeList[i].x += ((pipeList[i].getWidth()*2)+200)*i;
@@ -82,22 +75,16 @@ public class Player
         }else{
             for (int i=0; i<pipeList.length; ++i){
                 if (pipeList[i] == null){
-                    Pipe newPipe = new Pipe();
+                    newPipe = new Pipe();
                     pipeList[i] = newPipe;
                     for (int j=0; j<a.length; ++j){
-                        if ( a[j] == this ){
+                        if ( a[j].id == this.id ){
                             continue;
                         }
                         if ( a[j].pipeList[i] != null ){
-                            a[j].temporaryPipe.add(new Pipe(newPipe));
-                            System.out.println("Tmp pipe added to player " + j);
+                            a[j].addTempPipe(new Pipe(newPipe));
                         }else{
-                            a[j].pipeList[i] = new Pipe(newPipe);
-                            if ( i == 0 ){
-                                a[j].pipeList[i].x = (a[j].pipeList[a[j].pipeList.length-1].x+a[j].pipeList[i].getWidth())+((a[j].pipeList[i].getWidth()*2)); 
-                            }else{
-                                a[j].pipeList[i].x = (a[j].pipeList[i-1].x+a[j].pipeList[i].getWidth())+((a[j].pipeList[i].getWidth()*2)); 
-                            }
+                            a[j].pipeList[i] = newPipe;
                         }
                     }
                     // create space between each pipe

@@ -8,7 +8,7 @@ public class Scoreboard extends Components
 {
     // array of icon that represent number 0-9
     private BufferedImage number[] = new BufferedImage[10];  
-    public int positionX; 
+    public int positionX = 1280-100; // screen width -10
     public int positionY = 10;
     public int numWidth;
     public int score=0;

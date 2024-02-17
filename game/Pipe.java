@@ -11,7 +11,7 @@ class Pipe extends Components
     public int gap;
     public BufferedImage pipeImg[] = new BufferedImage[2];
     public int width, height;
-    public static int i;
+    public boolean used = false;
     
     public Pipe(Pipe p){
         this.x = p.x;
@@ -21,7 +21,6 @@ class Pipe extends Components
         System.arraycopy(p.pipeImg, 0, this.pipeImg, 0, p.pipeImg.length);
         this.width = p.width;
         this.height = p.height;
-        this.i = p.i;
     }
     public Pipe(){
         for (int i=0; i<pipeImg.length; ++i){
