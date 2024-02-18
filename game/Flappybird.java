@@ -81,6 +81,7 @@ public class Flappybird {
             frame.requestFocusInWindow();
         });
         frame.requestFocusInWindow();
+
         frame.addKeyListener(k);
     }
 

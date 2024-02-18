@@ -221,6 +221,7 @@ public class Panel extends JPanel implements ActionListener{
         }
     }
 
+
     public void jump(){
         jumping = true;
         self.flappyA = -7;
