@@ -9,22 +9,21 @@ public class Flappybird {
     private JFrame frame;
     private Panel panel[];
     private Player player[];
-    public Flappybird(int numberOfPlayer, int mode) {
+    public Flappybird(int mode) {
         frame = new JFrame();
-        player = new Player[numberOfPlayer];
-        panel = new Panel[numberOfPlayer];
-        for (int i=0; i<player.length; ++i){
-            player[i] = new Player(i);
-        }
+        // setup Frame 
         frame.setTitle("FlappyBird");
         frame.setSize(new Dimension(1280, 720));
         frame.setVisible(true);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        System.out.println(frame.getHeight()+" " + frame.getWidth());
+        // implement KeyListener
         KeyListener k = new KeyListener(){
             @Override
             public void keyPressed(KeyEvent e) {
                 int code = e.getKeyCode();
+                // if code is a jump button then make a bird who uses that code jump
                 for (int i=0; i<panel.length; ++i){
                     if (code == panel[i].self.jump){
                         panel[i].jump();
@@ -37,15 +36,28 @@ public class Flappybird {
             @Override
             public void keyReleased(KeyEvent e) {}
         };
+        // Single player mode
         if ( mode == 0 ){
+            player = new Player[1];
+            panel = new Panel[1];
+            for (int i=0; i<player.length; ++i){
+                player[i] = new Player(i);
+            }
             singlePlay(k);
         }
+        // Dual player mode
         if ( mode == 1 ){
+            player = new Player[2];
+            panel = new Panel[2];
+            for (int i=0; i<player.length; ++i){
+                player[i] = new Player(i);
+            }
             dualPanel(k);
         }
     }
+    // implement single player mode
     private void singlePlay(KeyListener k){
-        panel[0] = new Panel(0, KeyEvent.VK_SPACE, player);
+        panel[0] = new Panel(0, KeyEvent.VK_SPACE, player, frame.getWidth(), frame.getHeight());
         panel[0].p.addActionListener((e) -> {
             panel[0].t.stop();
             panel[0].requestFocusInWindow();
@@ -58,36 +70,25 @@ public class Flappybird {
         frame.requestFocusInWindow();
         frame.addKeyListener(k);
     }
+    // implement dual player mode
     private void dualPanel(KeyListener k){
-        panel[0] = new Panel(0, KeyEvent.VK_SPACE, player);
-        panel[1] = new Panel(1, KeyEvent.VK_UP, player);
+        panel[0] = new Panel(0, KeyEvent.VK_SPACE, player, frame.getWidth(), frame.getHeight());
+        panel[1] = new Panel(1, KeyEvent.VK_UP, player, frame.getWidth(), frame.getHeight());
         for ( int i=0; i<panel.length; ++i){
             frame.add(panel[i]);
         }
         panel[0].p.addActionListener((e) -> {
             panel[0].t.stop();
+            panel[1].t.stop();
             frame.requestFocusInWindow();
         });
         panel[0].s.addActionListener((e) -> {
             panel[0].t.start();
-            frame.requestFocusInWindow();
-        });
-        panel[1].p.addActionListener((e) -> {
-            panel[1].t.stop();
-            frame.requestFocusInWindow();
-        });
-        panel[1].s.addActionListener((e) -> {
             panel[1].t.start();
             frame.requestFocusInWindow();
         });
         frame.requestFocusInWindow();
-
         frame.addKeyListener(k);
-    }
-
-    public static void main(String[] args) {
-        // 
-        new Flappybird(2, 1);
     }
     
 }
