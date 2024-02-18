@@ -149,7 +149,8 @@ public class FlappyBirdMenu extends JFrame {
         // Close the menu
         // Start the Flappy Bird game for singleplayer
         String[] args = {};
-        Flappybird.main(args);
+        // Flappybird.main(args);
+        new Flappybird(1, 0); // 1 player mode number 0 (single player)
         });
 
         singlePlayerPanel.add(startButton);
