@@ -6,6 +6,7 @@ public class Player
     public ArrayList<Pipe> temporaryPipe;
     public Hitbox hitbox;
     public Scoreboard score;
+    public Heartbar heartBar;
     public boolean firstStage = true;
     public int id;
     public int flappyV = 0;
@@ -15,10 +16,11 @@ public class Player
     
     public Player(int id){
         this.id = id;
-        bird = new Bird(2); 
-        pipeList = new Pipe[10];
-        score = new Scoreboard(); 
-        temporaryPipe = new ArrayList<Pipe>();
+        this.bird = new Bird(2); 
+        this.pipeList = new Pipe[10];
+        this.score = new Scoreboard(); 
+        this.heartBar = new Heartbar();
+        this.temporaryPipe = new ArrayList<Pipe>();
     } 
 
     public void addTempPipe(Pipe p){

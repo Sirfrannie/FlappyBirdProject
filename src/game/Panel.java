@@ -13,50 +13,70 @@ import java.io.File;
 import java.io.IOException;
 
 public class Panel extends JPanel implements ActionListener{
-    private Background bg[];
-    private Boarder boarder;
-    private Player player[];
-    public Player self;
-    private Player pipeBuilder;
+    private Background bg[]; // background array
+    private Boarder boarder; 
+    private Player player[]; // array of all player
+    public Player self; // primary player ( who use this Panel )
+    // pipe builder's duty is to make Pipe for itself and another player 
+    // for all pipe that all player face must be same 
+    private Player pipeBuilder; 
+    // frame width and height
+    private int WIDTH, HEIGHT;
 
-    public final int WIDTH = 1280, HEIGHT = 720;
-
-    //  components detail
+    // components detail
     private int bgWidth;
-    // bird
-    private int flappyheight;
-    private boolean gameOver = false;
-   //
-    private boolean isPlaying = true;
-    private boolean firstStageBg = true;
-    private boolean jumping = false;
+    private int flappyheight; // the initial height of bird from ground 
+
+    private boolean gameOver = false; // if game Over
+    private boolean isPlaying = true; // if player playing
+    private boolean firstStageBg = true; // no comments
+    private boolean jumping = false; // if the bird is jumping
 
     public Timer t;
-    public JButton p = new JButton("p");
-    public JButton s = new JButton("s");
-    public Panel(int id, int jump, Player player[]) {
+    // pause and continue button
+    public JButton p = new JButton("pause");
+    public JButton s = new JButton("continue");
+
+    public Panel(int id, int jump, Player player[], int frameWidth, int frameHeight) {
+        this.WIDTH = frameWidth;
+        this.HEIGHT = frameHeight;
         setFocusable(true);
+        // enable Double buffered feature make animation run more smoothly
         setDoubleBuffered(true);
+        // precreate 6 backgrounds ahead
         bg = new Background[6];
 
+        // reference player array
         this.player = player;
-        self = player[id];
+        // declare primary player
+        this.self = player[id];
         self.jump = jump;
+        // set Scoreboard Position
         self.score.positionX = (WIDTH/player.length)-100;
+        self.heartBar.positionX = ((WIDTH/player.length)/2)-100;
+        // first Pipe builder
         pipeBuilder = player[0]; 
 
         // stop and continue button
         p.setBounds(10, 5, 30, 30);
         s.setBounds(45, 5, 30, 30);
-        this.add(p);
-        this.add(s);
+        // add Button only for Fist Panel
+        if (id == 0){
+            this.add(p);
+            this.add(s);
+        }
 
+        // set Panel Size and Location
         this.setBounds((int)(0+((WIDTH/2)*id)), 0, (int)(WIDTH/player.length), HEIGHT);
+        // Border frame
         boarder = new Boarder(1280, 720);
+        // set scale of boarder
+        boarder.img = boarder.setScale(boarder.getImage(), WIDTH, HEIGHT);
 
         flappyheight = (HEIGHT/2)+(self.bird.getHeight()/2);
         t = new Timer(40, this);
         t.start();
+        // to delay time before Timer start
         t.setInitialDelay(1000);
     }
     @Override 
@@ -64,14 +84,16 @@ public class Panel extends JPanel implements ActionListener{
         if (!gameOver) { // while the game is poccessing
             drawbg(g);
             drawbird(g);
+            drawpipe(g);
             if (isPlaying){ // while player is playing
-                drawpipe(g);
                 self.buildHitbox();
                 logic(g);
             }
-            drawboarder(g);
+            // drawboarder(g);
+            self.heartBar.drawHeart(g);
             self.score.update(g);
         }else{
+
         }
     }
     @Override
@@ -81,11 +103,11 @@ public class Panel extends JPanel implements ActionListener{
             // (de)increase bird position (to make bird fell down)
             self.flappyA += self.flappyI;
             self.flappyV += self.flappyA;
-            // lowest position possible
+            // limits lowest position 
             if (self.flappyV > (HEIGHT-flappyheight)-100){
                 self.flappyV = (HEIGHT-flappyheight)-100;
             }
-            // highest position possible 
+            // limits highest position 
             if (flappyheight + self.flappyV < 10){
                 // System.out.println(p.flappyV);
                 self.flappyV = -1*flappyheight+10;
@@ -126,7 +148,8 @@ public class Panel extends JPanel implements ActionListener{
         Toolkit.getDefaultToolkit().sync(); //synchronizes the graphic state make it run smoothly
     }
     private void drawboarder(Graphics g){
-        g.drawImage(boarder.getImage(), -30, -20, null); // redraw bird
+        // paint Boarder
+        g.drawImage(boarder.getImage(), 0, 0, null); 
     }
     private void drawbird(Graphics g) {
         if ( jumping ){
@@ -198,19 +221,29 @@ public class Panel extends JPanel implements ActionListener{
                     ){
 
                 System.out.println("Hit");
+                // decrease player's heart 
+                self.heartBar.decrease();
+                // draw dizzing img
                 g.drawImage(self.bird.getStunning(), self.bird.x, flappyheight + self.flappyV, null); // redraw bird
+                // to freeze the Screen
                 t.stop();
                 t.start();
                 self.hitbox = null; // remove hitbox from that pipe 
+                // if player has no remain heart then game OVER
+                if ( self.heartBar.numOfHeart == 0 ){
+                    gameOver = true;
+                }
                 return;
             }
-            if ( self.bird.x >= self.hitbox.scoreLine ){
+            if ( self.bird.x >= self.hitbox.scoreLine ){ // if the bird passed scoreLine
                 System.out.println("Scored");
+                // add score by one 
                 self.score.plus(1);
                 self.hitbox = null; // remove hitbox form that pipe
             }
         }
     }
+    // find new Pipe builder by finding highest score player
     private void findNewBuilder(){
         for (int i=0; i<player.length; ++i){
             if (player[i].score.score > pipeBuilder.score.score){
