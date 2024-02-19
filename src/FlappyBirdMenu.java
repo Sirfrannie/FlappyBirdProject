@@ -14,6 +14,12 @@ public class FlappyBirdMenu extends JFrame {
     private BufferedImage backgroundScaled;
     private SoundPlayer backgroundMusicPlayer;
     private SoundPlayer hoverSoundPlayer;
+    private int selectedBirdSinglePlayer = -1;
+    private int selectedBirdDualPlayer1 = -1;
+    private int selectedBirdDualPlayer2 = -1;
+    private JLabel instructionLabel;
+    private JButton startButtonSinglePlayer;
+    private JButton startButtonDualPlayer;
 
     public FlappyBirdMenu() {
         setTitle("Flappy Bird");
@@ -23,19 +29,19 @@ public class FlappyBirdMenu extends JFrame {
 
         cards = new JPanel(cardLayout);
         setLayout(new BorderLayout());
-        add(cards);
+        add(cards, BorderLayout.CENTER);
 
         loadCustomFont("fonts/2005_iannnnnAMD.ttf");
         loadAndResizeBackground("img/menu_background.png");
         JPanel mainMenuPanel = prepareGUI();
         JPanel gameModesPanel = createGameModesPanel();
-        JPanel singlePlayerPanel = createSinglePlayerPanel(); // Singleplayer Panel
-        JPanel dualPlayerPanel = createDualPlayerPanel(); // Dual Panel
+        JPanel singlePlayerBirdSelectionPanel = createSinglePlayerBirdSelectionPanel();
+        JPanel dualPlayerBirdSelectionPanel = createDualPlayerBirdSelectionPanel();
 
         cards.add(mainMenuPanel, "MainMenu");
         cards.add(gameModesPanel, "GameModes");
-        cards.add(singlePlayerPanel, "SinglePlayer");
-        cards.add(dualPlayerPanel, "DualPlayer");
+        cards.add(singlePlayerBirdSelectionPanel, "SinglePlayerBirdSelection");
+        cards.add(dualPlayerBirdSelectionPanel, "DualPlayerBirdSelection");
 
         initializeSounds();
         setVisible(true);
@@ -51,19 +57,23 @@ public class FlappyBirdMenu extends JFrame {
         };
 
         menuPanel.setPreferredSize(new Dimension(1280, 720));
-        
+
         JLabel titleLabel = createTitleLabel("FLAPPY BIRD");
         titleLabel.setBounds(340, 20, 600, 150);
         menuPanel.add(titleLabel);
 
-        String[] buttonLabels = {"PLAY", "LEADERBOARD", "OPTIONS", "CREDITS", "EXIT"};
+        String[] buttonLabels = {"PLAY", "EXIT"};
         int yPos = 200;
         for (String label : buttonLabels) {
             JButton button = createMenuButton(label);
             button.setBounds(540, yPos, 200, 50);
-            if ("EXIT".equals(label)) {
-                button.addActionListener(e -> System.exit(0));
-            }
+            button.addActionListener(e -> {
+                if ("PLAY".equals(label)) {
+                    cardLayout.show(cards, "GameModes");
+                } else if ("EXIT".equals(label)) {
+                    System.exit(0);
+                }
+            });
             yPos += 80;
             menuPanel.add(button);
         }
@@ -79,153 +89,183 @@ public class FlappyBirdMenu extends JFrame {
             }
         };
 
-        String[] modeButtons = {"SINGLEPLAYER", "DUAL", "BACK"};
-        int yPos = 200;
+        gameModesPanel.setPreferredSize(new Dimension(1280, 720));
 
+        String[] modeButtons = {"SINGLEPLAYER", "DUAL PLAYER", "BACK"};
+        int yPos = 200;
         for (String label : modeButtons) {
             JButton button = createMenuButton(label);
             button.setBounds(540, yPos, 200, 50);
+            button.addActionListener(e -> {
+                if ("SINGLEPLAYER".equals(label)) {
+                    cardLayout.show(cards, "SinglePlayerBirdSelection");
+                } else if ("DUAL PLAYER".equals(label)) {
+                    cardLayout.show(cards, "DualPlayerBirdSelection");
+                } else if ("BACK".equals(label)) {
+                    cardLayout.show(cards, "MainMenu");
+                }
+            });
             yPos += 80;
-
-            if ("SINGLEPLAYER".equals(label)) {
-                button.addActionListener(e -> cardLayout.show(cards, "SinglePlayer"));
-            } else if ("DUAL".equals(label)) {
-                button.addActionListener(e -> cardLayout.show(cards, "DualPlayer"));
-            } else if ("BACK".equals(label)) {
-                button.addActionListener(e -> cardLayout.show(cards, "MainMenu"));
-            }
-             
             gameModesPanel.add(button);
         }
 
-        gameModesPanel.setPreferredSize(new Dimension(1280, 720));
         return gameModesPanel;
     }
-    private JPanel createSinglePlayerPanel() {
-        
-        JPanel singlePlayerPanel = new JPanel(null) {
+
+    private JPanel createSinglePlayerBirdSelectionPanel() {
+        JPanel birdSelectionPanel = new JPanel(null) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 g.drawImage(backgroundScaled, 0, 0, this.getWidth(), this.getHeight(), this);
             }
         };
-    
-        int middleX = (1280 - 200) / 2; 
-        int middleY = (720 - 200) / 2;
-    
-        JButton onePlayerButton = createMenuButtonWithIcon("1P", "img/bluebird-midflap.png");
-        onePlayerButton.setBounds(middleX, middleY, 200, 100);
-        singlePlayerPanel.add(onePlayerButton);
-    
-        int backButtonX = 60; 
-        int startButtonX = 1280 - 260;
-        int buttonsY = 720 - 120; 
-    
+        birdSelectionPanel.setPreferredSize(new Dimension(1280, 720));
+
+        JLabel titleLabel = new JLabel("Choose Your Bird", SwingConstants.CENTER);
+        titleLabel.setFont(customFont.deriveFont(48f));
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setBounds(0, 20, 1280, 60);
+        birdSelectionPanel.add(titleLabel);
+
+        String[] birdFiles = {"bird00-2.png", "bird01-2.png", "bird02-2.png", "bird03-2.png"};
+        for (int i = 0; i < birdFiles.length; i++) {
+            final int birdIndex = i;
+            JButton birdButton = createBirdSelectionButton("game/img/bird/" + birdFiles[i]);
+            birdButton.setBounds(380 + (i * 160), 200, 64, 64);
+            birdButton.addActionListener(e -> {
+                selectedBirdSinglePlayer = birdIndex;
+                if (startButtonSinglePlayer == null) {
+                    startButtonSinglePlayer = createStartButton(birdSelectionPanel, true);
+                    birdSelectionPanel.add(startButtonSinglePlayer);
+                    birdSelectionPanel.repaint();
+                }
+            });
+            birdSelectionPanel.add(birdButton);
+        }
+
         JButton backButton = createMenuButton("BACK");
-        backButton.setBounds(backButtonX, buttonsY, 200, 50);
-        backButton.addActionListener(e -> cardLayout.show(cards, "GameModes"));
-        singlePlayerPanel.add(backButton);
-    
+        backButton.setBounds(60, 620, 200, 50);
+        backButton.addActionListener(e -> {
+            // Reset selection and remove START button if present
+            selectedBirdSinglePlayer = -1;
+            if (startButtonSinglePlayer != null) {
+                birdSelectionPanel.remove(startButtonSinglePlayer);
+                birdSelectionPanel.revalidate();
+                birdSelectionPanel.repaint();
+                startButtonSinglePlayer = null;
+            }
+            cardLayout.show(cards, "GameModes");
+        });
+        birdSelectionPanel.add(backButton);
+
+        return birdSelectionPanel;
+    }
+
+    private JPanel createDualPlayerBirdSelectionPanel() {
+        JPanel birdSelectionPanel = new JPanel(null) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(backgroundScaled, 0, 0, this.getWidth(), this.getHeight(), this);
+            }
+        };
+        birdSelectionPanel.setPreferredSize(new Dimension(1280, 720));
+
+        instructionLabel = new JLabel("P1: Choose Your Bird", SwingConstants.CENTER);
+        instructionLabel.setFont(customFont.deriveFont(48f));
+        instructionLabel.setForeground(Color.WHITE);
+        instructionLabel.setBounds(0, 20, 1280, 60);
+        birdSelectionPanel.add(instructionLabel);
+
+        String[] birdFiles = {"bird00-2.png", "bird01-2.png", "bird02-2.png", "bird03-2.png"};
+        for (int i = 0; i < birdFiles.length; i++) {
+            JButton birdButton = createBirdSelectionButton("game/img/bird/" + birdFiles[i]);
+            birdButton.setBounds(380 + (i * 160), 200, 64, 64);
+            int finalI = i;
+            birdButton.addActionListener(e -> {
+                JLabel playerLabel = new JLabel();
+                playerLabel.setFont(customFont.deriveFont(18f));
+                playerLabel.setBounds(birdButton.getX(), birdButton.getY() + birdButton.getHeight(), birdButton.getWidth(), 30);
+                playerLabel.setForeground(Color.WHITE);
+                if (selectedBirdDualPlayer1 == -1) {
+                    selectedBirdDualPlayer1 = finalI;
+                    playerLabel.setText("P1");
+                    birdSelectionPanel.add(playerLabel);
+                    instructionLabel.setText("P2: Choose Your Bird");
+                } else if (selectedBirdDualPlayer2 == -1 && finalI != selectedBirdDualPlayer1) {
+                    selectedBirdDualPlayer2 = finalI;
+                    playerLabel.setText("P2");
+                    birdSelectionPanel.add(playerLabel);
+                    if (startButtonDualPlayer == null) {
+                        startButtonDualPlayer = createStartButton(birdSelectionPanel, false);
+                        birdSelectionPanel.add(startButtonDualPlayer);
+                    }
+                }
+                birdSelectionPanel.revalidate();
+                birdSelectionPanel.repaint();
+            });
+            birdSelectionPanel.add(birdButton);
+        }
+
+        JButton backButton = createMenuButton("BACK");
+        backButton.setBounds(60, 620, 200, 50);
+        backButton.addActionListener(e -> {
+            // Reset selections
+            selectedBirdDualPlayer1 = -1;
+            selectedBirdDualPlayer2 = -1;
+
+            if (startButtonDualPlayer != null) {
+                birdSelectionPanel.remove(startButtonDualPlayer);
+                startButtonDualPlayer = null;
+            }
+            birdSelectionPanel.removeAll();
+            JPanel newPanel = createDualPlayerBirdSelectionPanel();
+            cards.add(newPanel, "DualPlayerBirdSelection");
+            cardLayout.show(cards, "GameModes");
+        });
+        birdSelectionPanel.add(backButton);
+
+        return birdSelectionPanel;
+    }
+
+    private JButton createBirdSelectionButton(String imagePath) {
+        ImageIcon birdIcon = new ImageIcon(imagePath);
+        JButton birdButton = new JButton(birdIcon);
+        birdButton.setFocusPainted(false);
+        birdButton.setBorderPainted(false);
+        birdButton.setContentAreaFilled(false);
+        birdButton.setOpaque(false);
+        return birdButton;
+    }
+
+    private JButton createStartButton(JPanel panel, boolean isSinglePlayer) {
         JButton startButton = new JButton("START");
         startButton.setFont(customFont);
         startButton.setFocusPainted(false);
         startButton.setContentAreaFilled(false);
+        startButton.setForeground(Color.BLACK);
+        startButton.setBackground(Color.ORANGE); 
         startButton.setOpaque(true);
         startButton.setBorderPainted(true);
-        startButton.setBackground(Color.ORANGE);
-        startButton.setForeground(Color.BLACK);
-        startButton.setBounds(startButtonX, buttonsY, 200, 50);
+        startButton.setBounds(panel.getWidth() - 250, panel.getHeight() - 65, 200, 50);
         startButton.addActionListener(e -> {
-            if (backgroundMusicPlayer != null) {
-                backgroundMusicPlayer.stop();
-            }
-
-        FlappyBirdMenu.this.dispose();
-        // Close the menu
-        // Start the Flappy Bird game for singleplayer
-        String[] args = {};
-        // Flappybird.main(args);
-        // new Flappybird(1, 0); // 1 player mode number 0 (single player)
-        });
-
-        singlePlayerPanel.add(startButton);
-
-    
-        // MouseListenerfor the button sound effect
-        startButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent evt) {
-                hoverSoundPlayer.play();
+            if (isSinglePlayer) {
+                startGame(0, selectedBirdSinglePlayer, selectedBirdSinglePlayer);
+            } else {
+                startGame(1, selectedBirdDualPlayer1, selectedBirdDualPlayer2);
             }
         });
-    
-        singlePlayerPanel.add(startButton);
-    
-        return singlePlayerPanel;
-    }
-    
-    private JPanel createDualPlayerPanel() {
-        JPanel dualPlayerPanel = new JPanel(null) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.drawImage(backgroundScaled, 0, 0, this.getWidth(), this.getHeight(), this);
-            }
-        };
-
-        // "1P" and "2P" buttons
-        int middleX = (1280 - 400) / 2; 
-        int middleY = (720 - 200) / 2;
-
-        JButton onePlayerButton = createMenuButtonWithIcon("1P", "img/bluebird-midflap.png");
-        onePlayerButton.setBounds(middleX, middleY, 200, 100);
-        dualPlayerPanel.add(onePlayerButton);
-
-        JButton twoPlayerButton = createMenuButtonWithIcon("2P", "img/bluebird-midflap.png");
-        twoPlayerButton.setBounds(middleX + 200, middleY, 200, 100);
-        dualPlayerPanel.add(twoPlayerButton);
-
-        int buttonsY = 720 - 120;
-        JButton backButton = createMenuButton("BACK");
-        backButton.setBounds(60, buttonsY, 200, 50);
-        backButton.addActionListener(e -> cardLayout.show(cards, "GameModes"));
-        dualPlayerPanel.add(backButton);
-
-        JButton startButton = new JButton("START");
-        startButton.setFont(customFont);
-        startButton.setFocusPainted(false);
-        startButton.setContentAreaFilled(false);
-        startButton.setOpaque(true);
-        startButton.setBorderPainted(true);
-        startButton.setBackground(Color.ORANGE);
-        startButton.setForeground(Color.BLACK);
-        startButton.setBounds(1280 - 260, buttonsY, 200, 50);
-        startButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent evt) {
-                hoverSoundPlayer.play();
-            }
-        });
-        dualPlayerPanel.add(startButton);
-
-        return dualPlayerPanel;
+        return startButton;
     }
 
-    private JButton createMenuButtonWithIcon(String text, String iconFilePath) {
-        JButton button = new JButton(text, new ImageIcon(iconFilePath));
-        button.setVerticalTextPosition(SwingConstants.BOTTOM);
-        button.setHorizontalTextPosition(SwingConstants.CENTER);
-        button.setFont(customFont);
-        button.setFocusPainted(false);
-        button.setContentAreaFilled(false);
-        button.setOpaque(true);
-        button.setBorderPainted(true);
-        button.setBackground(Color.ORANGE);
-        button.setForeground(Color.BLACK);
-        return button;
+    private void startGame(int mode, int bird1, int bird2) {
+        this.dispose(); 
+        
+        int[] birds = {bird1, bird2}; // Bird selections
+        new Flappybird(mode, birds); // Start the game with mode and birds
     }
-    
+
     private void loadCustomFont(String fontFileName) {
         try {
             customFont = Font.createFont(Font.TRUETYPE_FONT, new File(fontFileName)).deriveFont(24f);
@@ -247,7 +287,7 @@ public class FlappyBirdMenu extends JFrame {
     private JLabel createTitleLabel(String text) {
         JLabel label = new JLabel(text, SwingConstants.CENTER);
         label.setFont(customFont.deriveFont(100f));
-        label.setForeground(Color.BLACK);
+        label.setForeground(Color.WHITE);
         return label;
     }
 
@@ -264,13 +304,11 @@ public class FlappyBirdMenu extends JFrame {
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent evt) {
-                hoverSoundPlayer.play();
+                if (hoverSoundPlayer != null) {
+                    hoverSoundPlayer.play();
+                }
             }
         });
-
-        if ("PLAY".equals(text)) {
-            button.addActionListener(e -> cardLayout.show(cards, "GameModes"));
-        }
 
         return button;
     }
@@ -284,13 +322,13 @@ public class FlappyBirdMenu extends JFrame {
     public class SoundPlayer {
         private String soundFilePath;
         private boolean loop;
-        private Clip clip; // Make clip an instance variable to control it outside of play method
-    
+        private Clip clip;
+
         public SoundPlayer(String soundFilePath, boolean loop) {
             this.soundFilePath = soundFilePath;
             this.loop = loop;
         }
-    
+
         public void play() {
             try {
                 File soundFile = new File(soundFilePath);
@@ -306,8 +344,7 @@ public class FlappyBirdMenu extends JFrame {
                 e.printStackTrace();
             }
         }
-    
-        // Method to stop the music
+
         public void stop() {
             if (clip != null) {
                 clip.stop();
