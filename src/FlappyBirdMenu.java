@@ -1,3 +1,5 @@
+import game.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -260,16 +262,11 @@ public class FlappyBirdMenu extends JFrame {
     }
 
     private void startGame(int mode, int bird1, int bird2) {
-        this.dispose();
+        this.setVisible(false);
         
         int[] birds = {bird1, bird2}; // Bird selections
         
-        // Loop through the birds array
-        for (int b : birds) {
-            System.out.print(b); // Print each bird selection
-        } 
-
-        System.out.print(mode);
+        new Flappybird(mode, birds, this);
     }
 
     private void loadCustomFont(String fontFileName) {

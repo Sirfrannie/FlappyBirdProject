@@ -10,7 +10,7 @@ public class Background extends Components
     public boolean outFrame = false;
     public Background(){
         try {
-            img = ImageIO.read(new File("img/background-day.png"));
+            img = ImageIO.read(new File("game/img/background-day.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

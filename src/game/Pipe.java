@@ -28,7 +28,7 @@ class Pipe extends Components
     public Pipe(){
         for (int i=0; i<pipeImg.length; ++i){
             try {
-                pipeImg[i] = ImageIO.read(new File("img/pipe-green.png"));
+                pipeImg[i] = ImageIO.read(new File("game/img/pipe-green.png"));
                 pipeImg[i] = setScale(pipeImg[i], pipeImg[i].getWidth()+80, pipeImg[i].getHeight()+200);
                 if ( i == 1 ){
                     flip(pipeImg[i]);
@@ -77,9 +77,5 @@ class Pipe extends Components
     @Override
     public int getHeight(){
         return height;
-    }
-    @Override
-    public void finalize(){
-        System.out.println("Pipe Removed");
     }
 }

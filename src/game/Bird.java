@@ -11,7 +11,7 @@ class Bird extends Components
     public Bird(int id){
         try {
             for (int i=0; i<action.length; ++i){
-                action[i] = ImageIO.read(new File("img/bird/bird0"+id+"-"+i+".png"));
+                action[i] = ImageIO.read(new File("game/img/bird/bird0"+id+"-"+i+".png"));
             }
         } catch (IOException e) {
             e.printStackTrace();

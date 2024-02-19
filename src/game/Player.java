@@ -19,7 +19,6 @@ public class Player
     
     public Player(int id){
         this.id = id;
-        this.bird = new Bird(2); 
         this.pipeList = new Pipe[10];
         this.score = new Scoreboard(); 
         this.heartBar = new Heartbar();

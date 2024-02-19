@@ -67,10 +67,10 @@ public class Panel extends JPanel implements ActionListener{
 
         // loading Image
         try {
-            startImage = ImageIO.read(new File("img/message.png")); 
-            gameOverIcon = ImageIO.read(new File("img/gameover.png")); 
-            dimpBackground = ImageIO.read(new File("img/dimp.png")); 
-            flappyIcon = ImageIO.read(new File("img/flappybirdlogo.png"));
+            startImage = ImageIO.read(new File("game/img/message.png")); 
+            gameOverIcon = ImageIO.read(new File("game/img/gameover.png")); 
+            dimpBackground = ImageIO.read(new File("game/img/dimp.png")); 
+            flappyIcon = ImageIO.read(new File("game/img/flappybirdlogo.png"));
         }catch (IOException e){
             e.printStackTrace();
         }

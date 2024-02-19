@@ -10,11 +10,13 @@ import java.awt.Insets;
 import java.awt.GridLayout;
 
 public class Flappybird {
-    private JFrame frame;
+    public JFrame frame;
     private Panel panel[];
     private Player player[];
-    public Flappybird(int mode, int bird[]) {
+    private JFrame c;
+    public Flappybird(int mode, int bird[], JFrame caller) {
         frame = new JFrame();
+        c = caller;
         // setup Frame 
         frame.pack();
         frame.setTitle("FlappyBird");
@@ -82,6 +84,7 @@ public class Flappybird {
         });
         panel[0].exitButton.addActionListener((e) -> {
             frame.dispose();
+            c.setVisible(true);
             frame.requestFocusInWindow();
         });
         frame.add(panel[0]);
@@ -113,10 +116,12 @@ public class Flappybird {
         });
         panel[0].exitButton.addActionListener((e) -> {
             frame.dispose();
+            c.setVisible(true);
             frame.requestFocusInWindow();
         });
         panel[1].exitButton.addActionListener((e) -> {
             frame.dispose();
+            c.setVisible(true);
             frame.requestFocusInWindow();
         });
         frame.addKeyListener(k);
