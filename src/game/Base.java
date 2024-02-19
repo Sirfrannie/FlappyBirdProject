@@ -2,19 +2,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
-public class Background extends Components
+public class Base extends Components
 {
     int x = 0;
     public boolean outFrame = false;
-    public Background(){
+    public Base(){
         try {
-            img = ImageIO.read(new File("img/background-day.png"));
+            img = ImageIO.read(new File("img/base.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        width = img.getWidth();
-        height = img.getHeight();
-        img = setScale(img, (int)(width+(720-height)), 720);
     }
     
 }
