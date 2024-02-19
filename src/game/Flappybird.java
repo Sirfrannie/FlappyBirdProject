@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.Insets;
 
 public class Flappybird {
     private JFrame frame;
@@ -12,6 +13,8 @@ public class Flappybird {
     public Flappybird(int mode) {
         frame = new JFrame();
         // setup Frame 
+        // frame.setUndecorated(true);
+        frame.pack();
         frame.setTitle("FlappyBird");
         frame.setSize(new Dimension(1280, 720));
         frame.setVisible(true);
@@ -57,7 +60,7 @@ public class Flappybird {
     }
     // implement single player mode
     private void singlePlay(KeyListener k){
-        panel[0] = new Panel(0, KeyEvent.VK_SPACE, player, frame.getWidth(), frame.getHeight());
+        panel[0] = new Panel(0, KeyEvent.VK_SPACE, player, frame.getWidth(), frame.getHeight()-frame.getInsets().top);
         panel[0].p.addActionListener((e) -> {
             panel[0].t.stop();
             panel[0].requestFocusInWindow();

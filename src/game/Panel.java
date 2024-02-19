@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 
 public class Panel extends JPanel implements ActionListener{
-    private Background bg[]; // background array
     private Boarder boarder; 
     private Player player[]; // array of all player
     public Player self; // primary player ( who use this Panel )
@@ -25,16 +24,22 @@ public class Panel extends JPanel implements ActionListener{
 
     // components detail
     private int bgWidth;
+    private int baseWidth;
     private int flappyheight; // the initial height of bird from ground 
 
+    private Background bg[]; // background array
+    private Base base[];
+    private BufferedImage gameOverIcon;  
+    
     private boolean gameOver = false; // if game Over
-    private boolean isPlaying = true; // if player playing
+    private boolean isPlaying = false; // if player playing
     private boolean firstStageBg = true; // no comments
+    private boolean firstStageBase = true; // like Bg 
     private boolean jumping = false; // if the bird is jumping
 
     public Timer t;
     // pause and continue button
-    public JButton p = new JButton("pause");
+    public JButton p = new JButton("⏸");
     public JButton s = new JButton("continue");
 
     public Panel(int id, int jump, Player player[], int frameWidth, int frameHeight) {
@@ -45,6 +50,7 @@ public class Panel extends JPanel implements ActionListener{
         setDoubleBuffered(true);
         // precreate 6 backgrounds ahead
         bg = new Background[6];
+        base = new Base[6];
 
         // reference player array
         this.player = player;
@@ -58,8 +64,8 @@ public class Panel extends JPanel implements ActionListener{
         pipeBuilder = player[0]; 
 
         // stop and continue button
-        p.setBounds(10, 5, 30, 30);
-        s.setBounds(45, 5, 30, 30);
+        // p.setBounds(15, 5, 40, 40);
+        // s.setBounds(45, 5, 30, 30);
         // add Button only for Fist Panel
         if (id == 0){
             this.add(p);
@@ -70,10 +76,10 @@ public class Panel extends JPanel implements ActionListener{
         this.setBounds((int)(0+((WIDTH/2)*id)), 0, (int)(WIDTH/player.length), HEIGHT);
         // Border frame
         boarder = new Boarder(1280, 720);
-        // set scale of boarder
-        boarder.img = boarder.setScale(boarder.getImage(), WIDTH, HEIGHT);
 
         flappyheight = (HEIGHT/2)+(self.bird.getHeight()/2);
+        // set scale of boarder
+        boarder.img = boarder.setScale(boarder.getImage(), WIDTH, getHeight());
         t = new Timer(40, this);
         t.start();
         // to delay time before Timer start
@@ -81,19 +87,20 @@ public class Panel extends JPanel implements ActionListener{
     }
     @Override 
     public void paintComponent(Graphics g) {
+        drawbg(g);
+        drawpipe(g);
+        drawbase(g);
+        drawbird(g);
         if (!gameOver) { // while the game is poccessing
-            drawbg(g);
-            drawbird(g);
-            drawpipe(g);
             if (isPlaying){ // while player is playing
                 self.buildHitbox();
                 logic(g);
             }
-            // drawboarder(g);
+            drawboarder(g);
             self.heartBar.drawHeart(g);
             self.score.update(g);
         }else{
-
+            // drawGameOver(g);
         }
     }
     @Override
@@ -124,18 +131,29 @@ public class Panel extends JPanel implements ActionListener{
                     }
                 }
             }
-            
-        } // {if playing}
-        // background-action
-        for (int i=0; i<bg.length; ++i){
-            // moving
-            if (bg[i] != null){
-                bg[i].x-=4;
-                // get rid of it
-                if (bg[i].x < -1*bg[i].getWidth()-50){
-                    bg[i] = null;
+            // background-action
+            for (int i=0; i<bg.length; ++i){
+                // moving
+                if (bg[i] != null){
+                    bg[i].x-=4;
+                    // get rid of it
+                    if (bg[i].x < -1*bg[i].getWidth()-50){
+                        bg[i].outFrame = true; // mark that background is already out of frame
+                    }
                 }
             }
+            // base-action
+            for (int i=0; i<base.length; ++i){
+                // moving
+                if (base[i] != null){
+                    base[i].x-=4;
+                    // get rid of it
+                    if (base[i].x < -1*base[i].getWidth()-50){
+                        base[i].outFrame = true; // mark that background is already out of frame
+                    }
+                }
+            }
+            
         }
         // update hit box position make hitbox follow the pipe
         if ( self.hitbox != null ){
@@ -152,11 +170,46 @@ public class Panel extends JPanel implements ActionListener{
         g.drawImage(boarder.getImage(), 0, 0, null); 
     }
     private void drawbird(Graphics g) {
+        if ( !isPlaying ){
+            g.drawImage(self.bird.getImage(), self.bird.x, flappyheight, null); // redraw bird
+        }
         if ( jumping ){
             g.drawImage(self.bird.getFlapping(), self.bird.x, flappyheight + self.flappyV, null); // redraw bird
             jumping = !jumping;
         }else{
             g.drawImage(self.bird.getImage(), self.bird.x, flappyheight + self.flappyV, null); // redraw bird
+        }
+    }
+    private void drawbase(Graphics g){
+        // initalization ( all element in array of pipe are null )
+        if (firstStageBase){
+            for (int i=0; i<base.length; ++i){
+                if (base[i] == null){
+                    base[i] = new Base();
+                    // make each bg continue 
+                    base[i].x += base[i].getWidth()*i;
+                }
+                g.drawImage(base[i].getImage(), base[i].x, (HEIGHT-60), null); // draw bg
+            }    
+            baseWidth = base[0].getWidth();
+            firstStageBase = false; // end initialize stage 
+        }else{
+            for (int i=0; i<base.length; ++i){
+                // if bg is out of frame 
+                if (base[i].outFrame == true){
+                    // check if the first one in array
+                    if ( i == 0){
+                        // make it continue next to the last one 
+                        base[i].x = base[bg.length-1].x+baseWidth;
+                        base[i].outFrame = false;
+                    }else{
+                        // make it continue next to one before it 
+                        base[i].x = base[i-1].x+baseWidth;
+                        base[i].outFrame = false;
+                    }
+                }
+                g.drawImage(base[i].getImage(), base[i].x, (HEIGHT-60), null); // redraw bg
+            }    
         }
     }
     private void drawbg(Graphics g){
@@ -174,16 +227,17 @@ public class Panel extends JPanel implements ActionListener{
             firstStageBg = false; // end initialize stage 
         }else{
             for (int i=0; i<bg.length; ++i){
-                // if bg is non-exist
-                if (bg[i] == null){
-                    bg[i] = new Background();
+                // if bg is out of frame 
+                if (bg[i].outFrame == true){
                     // check if the first one in array
                     if ( i == 0){
                         // make it continue next to the last one 
                         bg[i].x = bg[bg.length-1].x+bgWidth;
+                        bg[i].outFrame = false;
                     }else{
                         // make it continue next to one before it 
                         bg[i].x = bg[i-1].x+bgWidth;
+                        bg[i].outFrame = false;
                     }
                 }
                 g.drawImage(bg[i].getImage(), bg[i].x, 0, null); // redraw bg
@@ -254,8 +308,10 @@ public class Panel extends JPanel implements ActionListener{
         }
     }
 
-
     public void jump(){
+        if (!isPlaying){
+            isPlaying = true;
+        }
         jumping = true;
         self.flappyA = -7;
     }
