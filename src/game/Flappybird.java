@@ -1,21 +1,22 @@
+package game;
+
 import javax.swing.JFrame;
-import javax.swing.JButton;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Insets;
-import java.awt.Graphics;
 import java.awt.GridLayout;
 
 public class Flappybird {
-    private JFrame frame;
+    public JFrame frame;
     private Panel panel[];
     private Player player[];
-    private JButton b = new JButton("test");
-    public Flappybird(int mode, int bird[]) {
+    private JFrame c;
+    public Flappybird(int mode, int bird[], JFrame caller) {
         frame = new JFrame();
+        c = caller;
         // setup Frame 
         frame.pack();
         frame.setTitle("FlappyBird");
@@ -24,7 +25,6 @@ public class Flappybird {
         frame.setVisible(true);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        Graphics g = frame.getGraphics();
         // implement KeyListener
         KeyListener k = new KeyListener(){
             @Override
@@ -84,6 +84,7 @@ public class Flappybird {
         });
         panel[0].exitButton.addActionListener((e) -> {
             frame.dispose();
+            c.setVisible(true);
             frame.requestFocusInWindow();
         });
         frame.add(panel[0]);
@@ -115,10 +116,12 @@ public class Flappybird {
         });
         panel[0].exitButton.addActionListener((e) -> {
             frame.dispose();
+            c.setVisible(true);
             frame.requestFocusInWindow();
         });
         panel[1].exitButton.addActionListener((e) -> {
             frame.dispose();
+            c.setVisible(true);
             frame.requestFocusInWindow();
         });
         frame.addKeyListener(k);

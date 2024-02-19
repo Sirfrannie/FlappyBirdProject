@@ -1,3 +1,5 @@
+package game;
+
 import java.util.ArrayList;
 public class Player
 {
@@ -13,10 +15,10 @@ public class Player
     public int flappyA = 7;
     public int flappyI = 1;
     public int jump;
+    public boolean alive = true;
     
     public Player(int id){
         this.id = id;
-        this.bird = new Bird(2); 
         this.pipeList = new Pipe[10];
         this.score = new Scoreboard(); 
         this.heartBar = new Heartbar();
@@ -45,12 +47,10 @@ public class Player
         return flappyheight+flappyV;
     }
     public void takeTmp(){
-        if ( !temporaryPipe.isEmpty() ){
-            System.out.println("form player "+id+" "+temporaryPipe);
+        if ( !temporaryPipe.isEmpty() && alive){
             for (int i=0; i<pipeList.length; ++i){
                 if ( pipeList[i] == null ){
                     pipeList[i] = temporaryPipe.remove(0); 
-                    System.out.println("form player "+id+" "+temporaryPipe);
                     if ( i == 0 ){
                         pipeList[i].x = (pipeList[pipeList.length-1].x+pipeList[i].getWidth())+((pipeList[i].getWidth()*2)); 
                     }else{
@@ -87,10 +87,10 @@ public class Player
                     Pipe newPipe = new Pipe();
                     pipeList[i] = newPipe;
                     for (int j=0; j<a.length; ++j){
-                        if ( a[j] == this ){
+                        if ( a[j] == this || !a[j].alive){
                             continue;
                         }
-                        if ( a[j].pipeList[i] != null ){
+                        if ( a[j].pipeList[i] != null){
                             a[j].temporaryPipe.add(new Pipe(newPipe));
                             System.out.println("Tmp pipe added to player " + j);
                         }else{

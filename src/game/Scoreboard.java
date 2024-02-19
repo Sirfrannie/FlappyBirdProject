@@ -1,3 +1,5 @@
+package game;
+
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -16,7 +18,7 @@ public class Scoreboard extends Components
         score = 0;
         for (int i=0; i<number.length; ++i){
             try {
-                number[i] = ImageIO.read(new File("img/number/"+i+".png"));
+                number[i] = ImageIO.read(new File("game/img/number/"+i+".png"));
             } catch (IOException e){
                 e.printStackTrace();
             }

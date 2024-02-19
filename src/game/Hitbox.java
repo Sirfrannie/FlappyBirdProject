@@ -1,3 +1,5 @@
+package game;
+
 public class Hitbox 
 {
     Pipe pipe;

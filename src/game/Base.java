@@ -1,3 +1,5 @@
+package game;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +10,7 @@ public class Base extends Components
     public boolean outFrame = false;
     public Base(){
         try {
-            img = ImageIO.read(new File("img/base.png"));
+            img = ImageIO.read(new File("game/img/base.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

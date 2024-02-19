@@ -1,3 +1,5 @@
+package game;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -17,8 +19,8 @@ public class Heartbar extends Components
     public int positionY = 50;
     public Heartbar(){
         try {
-            img = ImageIO.read(new File("img/heart/heart.png"));
-            noHeart = ImageIO.read(new File("img/heart/noheart.png"));
+            img = ImageIO.read(new File("game/img/heart/heart.png"));
+            noHeart = ImageIO.read(new File("game/img/heart/noheart.png"));
         } catch (IOException e){
             e.printStackTrace();
         }

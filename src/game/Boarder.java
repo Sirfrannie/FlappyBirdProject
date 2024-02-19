@@ -1,3 +1,5 @@
+package game;
+
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -7,7 +9,7 @@ public class Boarder extends Components
 {
     public Boarder(int width, int height){
         try {
-            img = ImageIO.read(new File("img/frame.png"));
+            img = ImageIO.read(new File("game/img/frame.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
