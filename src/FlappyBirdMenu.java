@@ -128,11 +128,11 @@ public class FlappyBirdMenu extends JFrame {
         titleLabel.setBounds(0, 20, 1280, 60);
         birdSelectionPanel.add(titleLabel);
 
-        String[] birdFiles = {"bird00-2.png", "bird01-2.png", "bird02-2.png", "bird03-2.png"};
+        String[] birdFiles = {"bird0.png", "bird1.png", "bird2.png", "bird3.png"};
         for (int i = 0; i < birdFiles.length; i++) {
             final int birdIndex = i;
             JButton birdButton = createBirdSelectionButton("game/img/bird/" + birdFiles[i]);
-            birdButton.setBounds(380 + (i * 160), 200, 64, 64);
+            birdButton.setBounds(380 + (i * 160), 200, 120, 90);
             birdButton.addActionListener(e -> {
                 selectedBirdSinglePlayer = birdIndex;
                 if (startButtonSinglePlayer == null) {
@@ -178,10 +178,10 @@ public class FlappyBirdMenu extends JFrame {
         instructionLabel.setBounds(0, 20, 1280, 60);
         birdSelectionPanel.add(instructionLabel);
 
-        String[] birdFiles = {"bird00-2.png", "bird01-2.png", "bird02-2.png", "bird03-2.png"};
+        String[] birdFiles = {"bird0.png", "bird1.png", "bird2.png", "bird3.png"};
         for (int i = 0; i < birdFiles.length; i++) {
             JButton birdButton = createBirdSelectionButton("game/img/bird/" + birdFiles[i]);
-            birdButton.setBounds(380 + (i * 160), 200, 64, 64);
+            birdButton.setBounds(380 + (i * 160), 200, 120,90);
             int finalI = i;
             birdButton.addActionListener(e -> {
                 JLabel playerLabel = new JLabel();
@@ -260,10 +260,16 @@ public class FlappyBirdMenu extends JFrame {
     }
 
     private void startGame(int mode, int bird1, int bird2) {
-        this.dispose(); 
+        this.dispose();
         
         int[] birds = {bird1, bird2}; // Bird selections
-        new Flappybird(mode, birds); // Start the game with mode and birds
+        
+        // Loop through the birds array
+        for (int b : birds) {
+            System.out.print(b); // Print each bird selection
+        } 
+
+        System.out.print(mode);
     }
 
     private void loadCustomFont(String fontFileName) {
