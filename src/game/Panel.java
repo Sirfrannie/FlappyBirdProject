@@ -1,3 +1,5 @@
+package game;
+
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.Timer;
@@ -6,8 +8,6 @@ import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +31,11 @@ public class Panel extends JPanel implements ActionListener{
 
     private Background bg[]; // background array
     private Base base[];
-    public BufferedImage gameOverIcon;  
-    public BufferedImage startImage;
-    public BufferedImage dimpBackground;
+    private BufferedImage gameOverIcon;  
+    private BufferedImage startImage;
+    private BufferedImage dimpBackground;
+    private BufferedImage flappyIcon;
+
     
     private boolean gameOver = false; // if game Over
     private boolean isPlaying = false; // if player playing
@@ -41,9 +43,9 @@ public class Panel extends JPanel implements ActionListener{
     private boolean firstStageBase = true; // like Bg 
     private boolean jumping = false; // if the bird is jumping
     private boolean started = false; // if the game has started
-    public boolean onPausing = false; // if game pausing
+    private boolean onPausing = false; // if game pausing
 
-    public Timer t;
+    private Timer t;
     // pause and continue button
     public JButton pauseButton = new JButton("⏸");
     public JButton exitButton = new JButton("exit");
@@ -68,6 +70,7 @@ public class Panel extends JPanel implements ActionListener{
             startImage = ImageIO.read(new File("img/message.png")); 
             gameOverIcon = ImageIO.read(new File("img/gameover.png")); 
             dimpBackground = ImageIO.read(new File("img/dimp.png")); 
+            flappyIcon = ImageIO.read(new File("img/flappybirdlogo.png"));
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -211,6 +214,7 @@ public class Panel extends JPanel implements ActionListener{
     private void drawPausing(Graphics g){
         // dimp background
         g.drawImage(dimpBackground, 0, 0, null);
+        g.drawImage(flappyIcon, (this.getWidth()/2)-(flappyIcon.getWidth()/2), 200, null);
     }   
     private void drawGameOver(Graphics g){
         // dimp background
@@ -231,18 +235,20 @@ public class Panel extends JPanel implements ActionListener{
         g.drawImage(boarder.getImage(), 0, 0, null); 
     }
     private void drawbird(Graphics g) {
+        // while not playing draw bird at same height level
         if ( !isPlaying ){
             g.drawImage(self.bird.getImage(), self.bird.x, flappyheight, null); // redraw bird
         }
+        // to draw jumping image
         if ( jumping ){
             g.drawImage(self.bird.getFlapping(), self.bird.x, flappyheight + self.flappyV, null); // redraw bird
             jumping = !jumping;
         }else{
+            // normal action
             g.drawImage(self.bird.getImage(), self.bird.x, flappyheight + self.flappyV, null); // redraw bird
         }
     }
     private void drawbase(Graphics g){
-        // initalization ( all element in array of pipe are null )
         if (firstStageBase){
             for (int i=0; i<base.length; ++i){
                 if (base[i] == null){
@@ -256,7 +262,7 @@ public class Panel extends JPanel implements ActionListener{
             firstStageBase = false; // end initialize stage 
         }else{
             for (int i=0; i<base.length; ++i){
-                // if bg is out of frame 
+                // if base is out of frame 
                 if (base[i].outFrame == true){
                     // check if the first one in array
                     if ( i == 0){
@@ -269,7 +275,7 @@ public class Panel extends JPanel implements ActionListener{
                         base[i].outFrame = false;
                     }
                 }
-                g.drawImage(base[i].getImage(), base[i].x, (HEIGHT-60), null); // redraw bg
+                g.drawImage(base[i].getImage(), base[i].x, (HEIGHT-60), null); // redraw base
             }    
         }
     }
@@ -335,7 +341,6 @@ public class Panel extends JPanel implements ActionListener{
                     || self.hitbox.front <= self.bird.x+self.bird.getWidth()-15 && self.bird.x <= self.hitbox.behind && position+self.bird.getHeight()-10> self.hitbox.botLevel
                     ){
 
-                System.out.println("Hit");
                 // decrease player's heart 
                 self.heartBar.decrease();
                 // draw dizzing img
@@ -347,11 +352,12 @@ public class Panel extends JPanel implements ActionListener{
                 // if player has no remain heart then game OVER
                 if ( self.heartBar.numOfHeart == 0 ){
                     gameOver = true;
+                    self.alive = false;
+                    self.score.setZero();
                 }
                 return;
             }
             if ( self.bird.x >= self.hitbox.scoreLine ){ // if the bird passed scoreLine
-                System.out.println("Scored");
                 // add score by one 
                 self.score.plus(1);
                 self.hitbox = null; // remove hitbox form that pipe
@@ -361,27 +367,24 @@ public class Panel extends JPanel implements ActionListener{
     // find new Pipe builder by finding highest score player
     private void findNewBuilder(){
         for (int i=0; i<player.length; ++i){
-            if (player[i].score.score > pipeBuilder.score.score){
+            if (player[i].score.score > pipeBuilder.score.score && player[i].alive){
                 pipeBuilder = player[i];
-                System.out.println("Current pipe builder is "+i);
-                System.out.println("Current pipe builder score is "+pipeBuilder.score.score);
+                // System.out.println("Current pipe builder is "+i);
+                // System.out.println("Current pipe builder score is "+pipeBuilder.score.score);
             }
         }
     }
 
     public void doPause(){
         if ( onPausing ){
+            // hide button while playing
             resumeButton.setVisible(false);
             exitButton.setVisible(false);
-            resumeButton.setBounds((this.getWidth()/2)-60, (this.getHeight()/2)-25, 120, 50);
-            exitButton.setBounds((this.getWidth()/2)-60, (this.getHeight()/2)+40, 120, 50);
             onPausing = !onPausing;
         }else{
             // reveal button when on pause screen
             resumeButton.setVisible(true);
             exitButton.setVisible(true);
-            resumeButton.setBounds((this.getWidth()/2)-60, (this.getHeight()/2)-25, 120, 50);
-            exitButton.setBounds((this.getWidth()/2)-60, (this.getHeight()/2)+40, 120, 50);
             onPausing = !onPausing;
         }
     }

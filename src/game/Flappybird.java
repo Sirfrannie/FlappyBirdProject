@@ -1,19 +1,18 @@
+package game;
+
 import javax.swing.JFrame;
-import javax.swing.JButton;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Insets;
-import java.awt.Graphics;
 import java.awt.GridLayout;
 
 public class Flappybird {
     private JFrame frame;
     private Panel panel[];
     private Player player[];
-    private JButton b = new JButton("test");
     public Flappybird(int mode, int bird[]) {
         frame = new JFrame();
         // setup Frame 
@@ -24,7 +23,6 @@ public class Flappybird {
         frame.setVisible(true);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        Graphics g = frame.getGraphics();
         // implement KeyListener
         KeyListener k = new KeyListener(){
             @Override

@@ -1,3 +1,5 @@
+package game;
+ 
 import java.io.IOException; // for Image reading exception
 import java.awt.image.BufferedImage; // handling Image
 import javax.imageio.ImageIO; // reading Image
