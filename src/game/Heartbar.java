@@ -14,7 +14,7 @@ public class Heartbar extends Components
     private BufferedImage noHeart;
     // position
     public int positionX;
-    public int positionY = 10;
+    public int positionY = 50;
     public Heartbar(){
         try {
             img = ImageIO.read(new File("img/heart/heart.png"));
