@@ -11,6 +11,8 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.awt.Insets;
+import java.awt.Color;
 
 public class Panel extends JPanel implements ActionListener{
     private Boarder boarder; 
@@ -29,28 +31,46 @@ public class Panel extends JPanel implements ActionListener{
 
     private Background bg[]; // background array
     private Base base[];
-    private BufferedImage gameOverIcon;  
+    public BufferedImage gameOverIcon;  
+    public BufferedImage startImage;
+    public BufferedImage dimpBackground;
     
     private boolean gameOver = false; // if game Over
     private boolean isPlaying = false; // if player playing
     private boolean firstStageBg = true; // no comments
     private boolean firstStageBase = true; // like Bg 
     private boolean jumping = false; // if the bird is jumping
+    private boolean started = false; // if the game has started
+    public boolean onPausing = false; // if game pausing
 
     public Timer t;
     // pause and continue button
-    public JButton p = new JButton("⏸");
-    public JButton s = new JButton("continue");
+    public JButton pauseButton = new JButton("⏸");
+    public JButton exitButton = new JButton("exit");
+    public JButton resumeButton = new JButton("resume");
 
     public Panel(int id, int jump, Player player[], int frameWidth, int frameHeight) {
         this.WIDTH = frameWidth;
         this.HEIGHT = frameHeight;
+        // set Panel Size and Location
+        this.setBounds((int)(0+((WIDTH/2)*id)), 0, WIDTH/player.length, HEIGHT);
         setFocusable(true);
         // enable Double buffered feature make animation run more smoothly
         setDoubleBuffered(true);
-        // precreate 6 backgrounds ahead
+        this.setLayout(null);
+
+        // precreate 6 backgrounds and base ahead 
         bg = new Background[6];
         base = new Base[6];
+
+        // loading Image
+        try {
+            startImage = ImageIO.read(new File("img/message.png")); 
+            gameOverIcon = ImageIO.read(new File("img/gameover.png")); 
+            dimpBackground = ImageIO.read(new File("img/dimp.png")); 
+        }catch (IOException e){
+            e.printStackTrace();
+        }
 
         // reference player array
         this.player = player;
@@ -59,27 +79,42 @@ public class Panel extends JPanel implements ActionListener{
         self.jump = jump;
         // set Scoreboard Position
         self.score.positionX = (WIDTH/player.length)-100;
-        self.heartBar.positionX = ((WIDTH/player.length)/2)-100;
+        self.heartBar.positionX = (WIDTH/player.length)-280;
         // first Pipe builder
         pipeBuilder = player[0]; 
 
-        // stop and continue button
-        // p.setBounds(15, 5, 40, 40);
-        // s.setBounds(45, 5, 30, 30);
-        // add Button only for Fist Panel
-        if (id == 0){
-            this.add(p);
-            this.add(s);
-        }
+        // setup JButton 
+        // pauseButton.setPreferredSize(new Dimension(30, 30));
+        pauseButton.setBounds(10, 10, 30, 30);
+        pauseButton.setMargin(new Insets(0, 0, 0, 0));
+        pauseButton.setForeground(Color.cyan);
+        pauseButton.setBackground(Color.blue);
 
-        // set Panel Size and Location
-        this.setBounds((int)(0+((WIDTH/2)*id)), 0, (int)(WIDTH/player.length), HEIGHT);
+        // resumeButton.setPreferredSize(new Dimension(120, 50));
+        resumeButton.setBounds((this.getWidth()/2)-60, (this.getHeight()/2)-25, 120, 50);
+        resumeButton.setMargin(new Insets(0, 0, 0, 0));
+        resumeButton.setForeground(Color.cyan);
+        resumeButton.setBackground(Color.blue);
+        
+        // exitButton.setPreferredSize(new Dimension(120, 50));
+        exitButton.setBounds((this.getWidth()/2)-60, (this.getHeight()/2)+40, 120, 50);
+        exitButton.setMargin(new Insets(0, 0, 0, 0));
+        exitButton.setForeground(Color.cyan);
+        exitButton.setBackground(Color.blue);
+        this.add(exitButton);
+        this.add(resumeButton);
+
+
+        this.add(pauseButton);
+        exitButton.setVisible(false);
+        resumeButton.setVisible(false);
+
         // Border frame
         boarder = new Boarder(1280, 720);
+        // set scale of boarder
+        boarder.img = boarder.setScale(boarder.getImage(), WIDTH/player.length, HEIGHT);
 
         flappyheight = (HEIGHT/2)+(self.bird.getHeight()/2);
-        // set scale of boarder
-        boarder.img = boarder.setScale(boarder.getImage(), WIDTH, getHeight());
         t = new Timer(40, this);
         t.start();
         // to delay time before Timer start
@@ -91,21 +126,29 @@ public class Panel extends JPanel implements ActionListener{
         drawpipe(g);
         drawbase(g);
         drawbird(g);
+        drawboarder(g);
+        if (!started){
+            drawStart(g);
+            return;
+        }
+        if (onPausing){
+            drawPausing(g);
+            return;
+        }
         if (!gameOver) { // while the game is poccessing
             if (isPlaying){ // while player is playing
                 self.buildHitbox();
                 logic(g);
             }
-            drawboarder(g);
             self.heartBar.drawHeart(g);
             self.score.update(g);
         }else{
-            // drawGameOver(g);
+            drawGameOver(g);
         }
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (isPlaying){
+        if (isPlaying && !gameOver && !onPausing){
             // bird-action
             // (de)increase bird position (to make bird fell down)
             self.flappyA += self.flappyI;
@@ -165,6 +208,24 @@ public class Panel extends JPanel implements ActionListener{
         repaint();
         Toolkit.getDefaultToolkit().sync(); //synchronizes the graphic state make it run smoothly
     }
+    private void drawPausing(Graphics g){
+        // dimp background
+        g.drawImage(dimpBackground, 0, 0, null);
+    }   
+    private void drawGameOver(Graphics g){
+        // dimp background
+        g.drawImage(dimpBackground, 0, 0, null);
+        // draw StartImage
+        g.drawImage(gameOverIcon, (this.getWidth()/2)-(startImage.getWidth()/2), (this.getHeight()/2)-(startImage.getHeight()/2), null);
+        t.stop();
+        exitButton.setVisible(true);
+    }   
+    private void drawStart(Graphics g){
+        // dimp background
+        g.drawImage(dimpBackground, 0, 0, null);
+        // draw StartImage
+        g.drawImage(startImage, (this.getWidth()/2)-(startImage.getWidth()/2), (this.getHeight()/2)-(startImage.getHeight()/2), null);
+    }   
     private void drawboarder(Graphics g){
         // paint Boarder
         g.drawImage(boarder.getImage(), 0, 0, null); 
@@ -265,7 +326,7 @@ public class Panel extends JPanel implements ActionListener{
             position = self.getBirdPosition(flappyheight);
             if (
                     // check if top left side hits the pipe
-                    self.hitbox.front <= self.bird.x && self.bird.x-15 <= self.hitbox.behind && position < self.hitbox.topLevel 
+                    self.hitbox.front <= self.bird.x && self.bird.x+20 <= self.hitbox.behind && position < self.hitbox.topLevel 
                     // check if top right side hits the pipe
                     || self.hitbox.front <= self.bird.x+self.bird.getWidth()-15 && self.bird.x <= self.hitbox.behind && position < self.hitbox.topLevel 
                     // check if bottom left side hits the pipe
@@ -308,9 +369,28 @@ public class Panel extends JPanel implements ActionListener{
         }
     }
 
+    public void doPause(){
+        if ( onPausing ){
+            resumeButton.setVisible(false);
+            exitButton.setVisible(false);
+            resumeButton.setBounds((this.getWidth()/2)-60, (this.getHeight()/2)-25, 120, 50);
+            exitButton.setBounds((this.getWidth()/2)-60, (this.getHeight()/2)+40, 120, 50);
+            onPausing = !onPausing;
+        }else{
+            // reveal button when on pause screen
+            resumeButton.setVisible(true);
+            exitButton.setVisible(true);
+            resumeButton.setBounds((this.getWidth()/2)-60, (this.getHeight()/2)-25, 120, 50);
+            exitButton.setBounds((this.getWidth()/2)-60, (this.getHeight()/2)+40, 120, 50);
+            onPausing = !onPausing;
+        }
+    }
     public void jump(){
         if (!isPlaying){
             isPlaying = true;
+        }
+        if (!started){
+            started = true;
         }
         jumping = true;
         self.flappyA = -7;
